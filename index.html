@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="TG Stream">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' wss://*.web.telegram.org; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' wss://*.web.telegram.org; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; frame-src 'self'; media-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -33,6 +33,18 @@
   .row { display:flex; gap:8px; margin-top:16px; }
   .row button { background:var(--card); color:var(--fg); border:1px solid var(--line); font-weight:400; font-size:14px; padding:8px; }
   .err { color:#c0392b; font-size:14px; }
+  h2 { font-size:15px; color:var(--muted); font-weight:600; margin:18px 0 8px; text-transform:uppercase; letter-spacing:.04em; }
+  li { display:flex; gap:12px; align-items:center; }
+  .ic { flex:none; width:40px; height:40px; border-radius:10px; background:var(--bg); display:grid; place-items:center; font-size:11px; font-weight:700; color:var(--accent); }
+  #viewer { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; z-index:10; padding-top:env(safe-area-inset-top); }
+  #viewer[hidden] { display:none; }
+  .vw-bar { display:flex; gap:8px; align-items:center; padding:10px 16px; border-bottom:1px solid var(--line); }
+  .vw-bar .t { flex:1; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .vw-bar button { width:auto; padding:8px 12px; font-size:14px; }
+  #vw-body { flex:1; overflow:auto; -webkit-overflow-scrolling:touch; }
+  #vw-body iframe { width:100%; height:100%; border:0; background:#fff; }
+  .txt { white-space:pre-wrap; padding:16px; max-width:720px; margin:0 auto; line-height:1.55; }
+  body.noscroll { overflow:hidden; }
   pre { white-space:pre-wrap; font-size:12px; color:var(--muted); background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px; max-height:240px; overflow:auto; }
 </style>
 </head>
@@ -75,6 +87,10 @@
   <div class="m" id="cachestat"></div>
   <pre id="log"></pre>
 </section>
+<div id="viewer" hidden>
+  <div class="vw-bar"><div class="t" id="vw-title"></div><button id="vw-full" type="button">На весь экран</button><button id="vw-close" type="button">Закрыть</button></div>
+  <div id="vw-body"></div>
+</div>
 <script src="app.js"></script>
 </body>
 </html>

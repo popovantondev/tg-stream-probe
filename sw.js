@@ -12,11 +12,13 @@ self.addEventListener('fetch', (e) => {
 async function pageFor(e) {
   const c = e.clientId && await self.clients.get(e.clientId);
   if (c) return c;
+  // новая вкладка «На весь экран» сама данных не качает — берём основную страницу
   const all = await self.clients.matchAll({ type: 'window' });
-  return all[0];
+  return all.find((x) => !new URL(x.url).pathname.includes('/stream/')) || all[0];
 }
 
 async function handle(e, id) {
+  const hasRange = e.request.headers.has('range');
   const h = e.request.headers.get('range') || 'bytes=0-';
   const mm = /bytes=(\d*)-(\d*)/.exec(h) || [];
   const start = mm[1] ? Number(mm[1]) : 0;
@@ -28,10 +30,15 @@ async function handle(e, id) {
     ch.port1.onmessage = (ev) => (ev.data.ok ? res(ev.data) : rej(new Error(ev.data.error)));
     setTimeout(() => rej(new Error('нет ответа 60 с')), 60000);
   });
-  page.postMessage({ type: 'range', id, start, end }, [ch.port2]);
+  page.postMessage({ type: 'range', id, start, end, full: !hasRange }, [ch.port2]);
   try {
     const r = await answer;
     if (start >= r.size) return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${r.size}` } });
+    if (r.full) {   // запрос без Range (PDF, текст) — файл целиком
+      return new Response(r.buf, { status: 200, headers: {
+        'Content-Type': r.type || 'application/octet-stream', 'Content-Length': String(r.buf.byteLength),
+        'Accept-Ranges': 'bytes', 'Cache-Control': 'no-store' } });
+    }
     return new Response(r.buf, {
       status: 206,
       headers: {
