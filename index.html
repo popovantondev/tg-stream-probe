@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TG Stream</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TG Stream">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' wss://*.web.telegram.org; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  :root { --bg:#f6f4ef; --fg:#1d1d1f; --muted:#6e6e73; --card:#fff; --line:#e3e0d8; --accent:#2f6f5e; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111; --fg:#f2f2f2; --muted:#a1a1a6; --card:#1c1c1e; --line:#2c2c2e; --accent:#5fb39b; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.4 -apple-system, system-ui, sans-serif;
+         padding: env(safe-area-inset-top) 16px 24px; }
+  h1 { font-size:22px; margin:16px 0 4px; }
+  .sub, .m { color:var(--muted); font-size:13px; }
+  video { width:100%; background:#000; border-radius:12px; aspect-ratio:16/9; }
+  .now { font-weight:600; margin:8px 0 2px; }
+  .stat { color:var(--muted); font-size:13px; min-height:1.4em; font-variant-numeric:tabular-nums; }
+  ul { list-style:none; padding:0; margin:16px 0 0; }
+  li { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:8px; cursor:pointer; }
+  li.on { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset; }
+  li .t { font-weight:600; }
+  form { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+  input, button { font:inherit; padding:12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--fg); width:100%; }
+  button { background:var(--accent); color:#fff; border:0; font-weight:600; }
+  .row { display:flex; gap:8px; margin-top:16px; }
+  .row button { background:var(--card); color:var(--fg); border:1px solid var(--line); font-weight:400; font-size:14px; padding:8px; }
+  .err { color:#c0392b; font-size:14px; }
+  pre { white-space:pre-wrap; font-size:12px; color:var(--muted); background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px; max-height:240px; overflow:auto; }
+</style>
+</head>
+<body>
+<section id="v-setup" hidden>
+  <h1>Ключи приложения Telegram</h1>
+  <div class="sub">Один раз на этом устройстве. Хранятся только в этом браузере, никуда не отправляются, кроме Telegram.
+    Взять на my.telegram.org → API development tools.</div>
+  <form id="setup-form" autocomplete="off">
+    <input id="api-id" inputmode="numeric" placeholder="api_id" autocomplete="off">
+    <input id="api-hash" placeholder="api_hash" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button type="submit">Сохранить</button>
+    <div class="err" id="setup-err"></div>
+  </form>
+</section>
+
+<section id="v-login" hidden>
+  <h1>Вход в Telegram</h1>
+  <div class="sub">Как вход в Web Telegram: это устройство появится в «Устройствах» Telegram.</div>
+  <form id="login-form" autocomplete="on">
+    <label id="login-label"></label>
+    <input id="login-input" autocapitalize="off" spellcheck="false">
+    <button type="submit">Дальше</button>
+  </form>
+</section>
+
+<section id="v-chats" hidden>
+  <h1>Какой канал?</h1>
+  <ul id="chats"></ul>
+</section>
+
+<section id="v-main" hidden>
+  <h1 id="chat-title">…</h1>
+  <div class="sub">Видео идёт прямо из Telegram на это устройство</div>
+  <video id="v" controls playsinline preload="metadata"></video>
+  <div class="now" id="now"></div>
+  <div class="stat" id="stat"></div>
+  <ul id="list"></ul>
+  <div class="row"><button id="btn-chat" type="button">Канал</button><button id="btn-logout" type="button">Выйти и стереть</button></div>
+  <div class="m" id="cachestat"></div>
+  <pre id="log"></pre>
+</section>
+<script src="app.js"></script>
+</body>
+</html>
